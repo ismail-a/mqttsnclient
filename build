@@ -1,3 +1,3 @@
 PATH_TO_MQTTSNPacket="Path"
-gcc -Wall -c $PATH_TO_MQTTSNPacket/samples/transport.c -Os -s
-gcc -Wall mqttsnclient.c transport.o -I $PATH_TO_MQTTSNPacket/src -I $PATH_TO_MQTTSNPacket/samples $PATH_TO_MQTTSNPacket/src/MQTTSNSerializePublish.c $PATH_TO_MQTTSNPacket/src/MQTTSNDeserializePublish.c $PATH_TO_MQTTSNPacket/src/MQTTSNPacket.c $PATH_TO_MQTTSNPacket/src/MQTTSNConnectClient.c -o mqttsnclient -Os -s
+gcc -Wall -fsigned-char -c $PATH_TO_MQTTSNPacket/samples/transport.c -Os -s
+gcc -Wall -fsigned-char mqttsnclient.c transport.o -I $PATH_TO_MQTTSNPacket/src -I $PATH_TO_MQTTSNPacket/samples $PATH_TO_MQTTSNPacket/src/MQTTSNSerializePublish.c $PATH_TO_MQTTSNPacket/src/MQTTSNDeserializePublish.c $PATH_TO_MQTTSNPacket/src/MQTTSNPacket.c $PATH_TO_MQTTSNPacket/src/MQTTSNConnectClient.c -o mqttsnclient -Os -s
