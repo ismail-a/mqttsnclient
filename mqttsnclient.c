@@ -11,11 +11,10 @@
  *   http://www.eclipse.org/org/documents/edl-v10.php.
  *
  * Contributors:
- *    Ian Craggs - initial API and implementation and/or initial documentation
- *    Sergio R. Caprile - clarifications and/or documentation extension
+ *    Ismail Arai
  *
  * Description:
- * Normal topic name used to show registration process
+ * Work on linux UDP protocol with Paho MQTTSNGateway.
  *******************************************************************************/
 
 #include <stdio.h>
@@ -27,9 +26,15 @@
 #include "transport.h"
 
 void exitPublisher(void);
+void usage(const char *);
 
 int main(int argc, char** argv)
 {
+	char option;
+	extern char *optarg;
+	extern int optind;
+	const char *command = argv[0];
+
 	int rc = 0;
 	int mysock;
 	unsigned char buf[512];
@@ -42,24 +47,35 @@ int main(int argc, char** argv)
 	char *clientID = "d:quickstart:udptest:9002f7f1ad23";
 	char *host = "127.0.0.1";
 	int port = 10000;
+	unsigned char message[512] = "Message";
 	MQTTSNPacket_connectData options = MQTTSNPacket_connectData_initializer;
 	unsigned short topicid;
+
+	while ((option = getopt(argc, argv, "h:p:t:c:m:")) != -1) {
+		switch(option) {
+			case 'h':
+				host = argv[optind - 1];
+				break;
+			case 'p':
+				port = atoi(optarg);
+				break;
+			case 't':
+				topicname = argv[optind - 1];
+				break;
+			case 'c':
+				clientID = argv[optind - 1];
+				break;
+			case 'm':
+				strcpy((char *)message, argv[optind - 1]);
+				break;
+			default:
+				usage(command);
+		}
+	}
 
 	mysock = transport_open();
 	if(mysock < 0)
 		return mysock;
-
-	if (argc > 1)
-		host = argv[1];
-
-	if (argc > 2)
-		port = atoi(argv[2]);
-
-	if (argc > 3)
-		topicname = argv[3];
-
-	if (argc > 4)
-		clientID = argv[4];
 
 	printf("Sending to hostname %s port %d\n", host, port);
 
@@ -115,15 +131,22 @@ int main(int argc, char** argv)
 	topic.type = MQTTSN_TOPIC_TYPE_NORMAL;
 	topic.data.id = topicid;
 
-	unsigned char payload[200] = "Payload";
-	int payloadlen = strlen((const char *)payload);
-	len = MQTTSNSerialize_publish(buf, buflen, 0, 0, retained, 0, topic, payload, payloadlen);
+	int messagelen = strlen((const char *)message);
+	len = MQTTSNSerialize_publish(buf, buflen, 0, 0, retained, 0, topic, message, messagelen);
 	rc = transport_sendPacketBuffer(host, port, buf, len);
 	printf("rc %d from send packet for publish length %d\n", rc, len);
 
 	exitPublisher();
 
 	return 0;
+}
+
+void usage(const char *command)
+{
+	fprintf(stderr, "Usage: %s [-h host ip address] [-p target port] [-t topic name] [-c client id] [-m message]\n", command);
+	fprintf(stderr, "Default value:\n  host ip address: 127.0.0.1\n  target port: 10000\n  topic name: MyTopicName\n  client id: d:quickstart:udptest:9002f7f1ad23\n  message: Massage\n");
+
+	exit(-1);
 }
 
 void exitPublisher(void)
